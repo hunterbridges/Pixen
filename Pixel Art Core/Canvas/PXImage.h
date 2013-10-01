@@ -6,6 +6,10 @@
 #import "PXColor.h"
 #import "PXPalette.h"
 
+extern int PXTileBitsPerComponent;
+extern int PXTileComponentsPerPixel;
+extern int PXTileDimension;
+
 typedef struct {
 	CGContextRef painting; //we draw into its bytes and make an image out of it when it changes
 	CGImageRef image; //we draw it onto the context during drawrect

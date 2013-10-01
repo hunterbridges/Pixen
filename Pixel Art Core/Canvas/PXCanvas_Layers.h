@@ -41,6 +41,9 @@
 
 - (void)mergeDownLayer:aLayer;
 
+- (void)selectContentsOfLayer:(PXLayer *)layer;
+- (void)selectContentsOfLayerAtIndex:(NSUInteger)index;
+
 - (void)moveLayer:(PXLayer *)layer byOffset:(NSPoint)offset;
 
 @end

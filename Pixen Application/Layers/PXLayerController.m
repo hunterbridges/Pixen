@@ -246,6 +246,12 @@
 	[item setAction:@selector(mergeDownSelectedLayer)];
 	[item setTarget:self];
 	[menu addItem:item];
+    
+   	item = [[NSMenuItem alloc] init];
+	[item setTitle:NSLocalizedString(@"Select Contents", @"Select Contents")];
+	[item setAction:@selector(selectLayerContents:)];
+	[item setTarget:self];
+	[menu addItem:item];
 	
 	[menu addItem:[NSMenuItem separatorItem]];
 	
@@ -518,6 +524,30 @@
 	}
 	
 	[self removeLayerAtIndex:[self invertLayerIndex:index]];
+}
+
+#pragma mark -
+#pragma mark Selecting Contents
+
+- (void)selectLayerContents:(id)sender
+{
+   	NSUInteger index = [self selectionIndex];
+	
+	if (index == NSNotFound || index >= [[_canvas layers] count]) {
+		NSLog(@"Invalid index");
+		return;
+	}
+    
+   	[self selectContentsOfLayerAtIndex:[self invertLayerIndex:index]];
+}
+
+- (void)selectContentsOfLayerAtIndex:(NSUInteger)index
+{
+    
+   	if ([[_canvas layers] count] <= 1)
+		return;
+    
+    [_canvas selectContentsOfLayerAtIndex:index];
 }
 
 #pragma mark -

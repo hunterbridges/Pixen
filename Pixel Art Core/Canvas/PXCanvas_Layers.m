@@ -6,6 +6,7 @@
 //  Copyright 2005 Pixen. All rights reserved.
 //
 
+#import <PXImage.h>
 #import "PXCanvas_Layers.h"
 #import "PXCanvas_Modifying.h"
 #import "PXCanvas_Selection.h"
@@ -306,6 +307,54 @@
 			});
 		}
 	} [self endUndoGrouping];
+}
+
+- (void)selectContentsOfLayer:(PXLayer *)layer
+{
+   	[self selectContentsOfLayerAtIndex:[layers indexOfObject:layer]];
+}
+
+- (void)selectContentsOfLayerAtIndex:(NSUInteger)index
+{
+    PXLayer *layer = [layers objectAtIndex:index];
+    
+    [self deselect];
+    int tileIdx;
+    int x, y;
+    size_t layerSize = layer.size.width * layer.size.height;
+    BOOL mask[layerSize];
+    for (tileIdx = 0; tileIdx < layer.image->tileCount; tileIdx++) {
+        PXTile *tile = layer.image->tiles[tileIdx];
+        CGPoint topLeft = tile->location;
+        unsigned char *data = CGBitmapContextGetData(tile->painting);
+        size_t bpr = CGBitmapContextGetBytesPerRow(tile->painting);
+        size_t rows = CGBitmapContextGetHeight(tile->painting);
+        size_t cols = CGBitmapContextGetWidth(tile->painting);
+        for (x = 0; x < cols; x++) {
+            if (x >= layer.size.width) break;
+            for (y = 0; y < rows; y++) {
+                if (y >= layer.size.height) break;
+                
+                long flip_y = rows - 1 - y;
+                if (flip_y < 0) continue;
+                
+                long abs_x = x + topLeft.x;
+                long abs_y = y + topLeft.y;
+                if (abs_y >= layer.size.height) continue;
+                
+                unsigned long idx = flip_y * bpr + x * PXTileComponentsPerPixel;
+                PXColor *color = (PXColor *)(data + idx);
+                unsigned long mask_idx = (abs_x) + (layer.size.height - 1 - abs_y) * layer.size.width;
+                
+                if (color->a > 0) {
+                    mask[mask_idx] = 1;
+                } else {
+                    mask[mask_idx] = 0;
+                }
+            }
+        }
+    }
+    self.mask = mask;
 }
 
 - (void)moveLayer:(PXLayer *)layer byOffset:(NSPoint)offset
